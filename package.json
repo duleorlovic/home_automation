@@ -1,0 +1,13 @@
+{
+  "name": "home_automation",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Dusan Orlovic <duleorlovic@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "bootstrap": "^4.0.0",
+    "fontawesome": "^4.7.2",
+    "jquery": "^3.3.1",
+    "popper.js": "^1.14.2"
+  }
+}
