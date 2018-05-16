@@ -1,4 +1,5 @@
 require 'sinatra'
+require 'sinatra/reloader' if development?
 require 'byebug'
 require 'logger'
 IS_RASPBERRY = system('uname -a | grep raspberrypi')
@@ -57,12 +58,28 @@ class MyPin
 
   def on
     # $logger.info "ON #{@h}"
-    @pin.on if IS_RASPBERRY
+    if IS_RASPBERRY
+      @pin.on
+    else
+      $session["value#{@h[:pin]}"] = true
+    end
   end
 
   def off
     # $logger.info "OFF #{@h}"
-    @pin.off if IS_RASPBERRY
+    if IS_RASPBERRY
+      @pin.off
+    else
+      $session["value#{@h[:pin]}"] = false
+    end
+  end
+
+  def read
+    if IS_RASPBERRY
+      @pin.read
+    else
+      $session["value#{@h[:pin]}"]
+    end
   end
 end
 
@@ -72,10 +89,12 @@ blind_up = MyPin.new pin: BLIND_UP_RELAY_1_PIN, direction: :out
 blind_down = MyPin.new pin: BLIND_DOWN_RELAY_1_PIN, direction: :out
 _light = MyPin.new pin: LIGHT_INPUT_PIN, direction: :in
 
-garden.on
-garden.off
+before do
+  $session = session
+end
 
 get '/' do
+  @garden = garden
   erb :index
 end
 
@@ -95,5 +114,6 @@ post '/' do
     blind_down.off
   end
   logger.info params
+  @garden = garden
   erb :index
 end

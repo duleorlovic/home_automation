@@ -2,10 +2,10 @@
 <form action="/" method="POST">
   <div class="form-group form-row">
     <div class='col'>
-      <input type="submit" name="commit" value="water-on" class="form-control btn btn-success">
+      <input type="submit" name="commit" value="water-on" class="form-control btn btn-success" <%= 'disabled' if @garden.read %>>
     </div>
     <div class='col'>
-      <input type="submit" name="commit" value="water-off" class="form-control btn btn-danger">
+      <input type="submit" name="commit" value="water-off" class="form-control btn btn-danger" <%= 'disabled' unless @garden.read %>>
     </div>
   </div>
   <div class="form-group form-row">
