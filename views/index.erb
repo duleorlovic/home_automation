@@ -1,9 +1,14 @@
-<h1>Dashboard</h1>
-<form action="/relay" method="POST">
-  <div class="form-group">
-    <input type="submit" name="commit" value="Water" class="form-control btn btn-success">
+<h1><a href='/'>Dashboard</a></h1>
+<form action="/" method="POST">
+  <div class="form-group form-row">
+    <div class='col'>
+      <input type="submit" name="commit" value="water-on" class="form-control btn btn-success">
+    </div>
+    <div class='col'>
+      <input type="submit" name="commit" value="water-off" class="form-control btn btn-danger">
+    </div>
   </div>
-  <div class="form-row">
+  <div class="form-group form-row">
     <div class="col">
       <input type="submit" name="commit" value='UP' class="form-control btn btn-primary">
     </div>

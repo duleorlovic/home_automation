@@ -1,2 +1,4 @@
 public/assets/node_modules
+/log/*
+!/log/.keep
 
