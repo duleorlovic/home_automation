@@ -1,5 +1,6 @@
 # rubocop:disable Style/GlobalVars
 require 'sinatra'
+require 'sinatra/activerecord'
 require 'sinatra/reloader' if development?
 require 'byebug'
 require 'logger'
@@ -16,6 +17,7 @@ BLIND_UP_RELAY_1_PIN = 7 # BCM 7, wPi 11, Physical 26
 BLIND_DOWN_RELAY_1_PIN = 8 # BCM 8, wPi 10, Physical 24
 LIGHT_INPUT_PIN = 18 # BCM 18, wPi 1, Physical 12
 TEMERATURE_PIN = 4 # BCM 4, wPi 7, Physical 7
+TEMPERATURE_FILE = '/sys/bus/w1/devices/28-000004e4793a/w1_slave'.freeze
 UP_DOWN_DURATION_IN_SECONDS = 2
 
 # http://recipes.sinatrarb.com/p/middleware/rack_commonlogger
@@ -47,6 +49,8 @@ end
 # to be able to access from other computers, or run with `ruby app.rb -o 0.0.0.0
 set :bind, '0.0.0.0'
 
+set :database, adapter: 'sqlite3', database: 'db/home_automation.sqlite3'
+
 enable :sessions
 
 # this is used as fake pin
@@ -76,7 +80,7 @@ class MyPin
 
   def read
     if IS_RASPBERRY
-      @pin.read
+      @pin.read == 1
     else
       $session["value#{@h[:pin]}"]
     end
@@ -120,12 +124,16 @@ garden = MyPin.new pin: GARDEN_MOTOR_RELAY_PIN, direction: :out
 blind_up = MyPin.new pin: BLIND_UP_RELAY_1_PIN, direction: :out
 blind_down = MyPin.new pin: BLIND_DOWN_RELAY_1_PIN, direction: :out
 _light = MyPin.new pin: LIGHT_INPUT_PIN, direction: :in
-t1 = OneWire.new '/sys/bus/w1/devices/28-000004e4793a/w1_slave'
+t1 = OneWire.new TEMPERATURE_FILE
+
+class Temperature < ActiveRecord::Base
+end
 
 before do
   $session = session
   @garden = garden
   @t1 = t1
+  @temperatures = Temperature.all
 end
 
 get '/' do

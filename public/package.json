@@ -1,0 +1,25 @@
+{
+  "name": "home_automation",
+  "version": "1.0.0",
+  "description": "## Run on Raspberry Pi",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/duleorlovic/home_automation.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/duleorlovic/home_automation/issues"
+  },
+  "homepage": "https://github.com/duleorlovic/home_automation#readme",
+  "dependencies": {
+    "bootstrap": "^4.1.1",
+    "chart.js": "^2.7.2",
+    "jquery": "^3.3.1",
+    "popper.js": "^1.14.3"
+  }
+}

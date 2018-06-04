@@ -18,5 +18,27 @@
     </div>
   </div>
 </form>
-<h2>Temperature</h2>
-<%= @t1.read %>
+<h2>Current Temperature <%= @t1.read %></h2>
+
+<canvas id='temperatures' width='100%' data-temperatures='<%= @temperatures.map{|t| t.celsius}.to_json %>' data-labels='<%= @temperatures.map{|t| t.created_at}.to_json %>'></canvas>
+<script>
+document.addEventListener('DOMContentLoaded', function(){ 
+  var el = document.getElementById("temperatures")
+  var ctx = el.getContext('2d')
+  var data = JSON.parse(el.dataset.temperatures)
+  var labels = JSON.parse(el.dataset.labels)
+
+  var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+      {
+        data: data,
+        label: 'Tavan',
+      },
+      ]
+    }
+  })
+}, false);
+</script>

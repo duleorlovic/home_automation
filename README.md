@@ -1,9 +1,29 @@
 # Home Automation
 
-## Run on Raspberry Pi
+## Requirements to Run on Raspberry Pi
+
+Sqlite3 on Rpi
+
+~~~
+sudo apt-get update; sudo apt-get -y dist-upgrade; sudo apt-get install sqlite3
+sudo apt-get install npm
+~~~
+
+Code and dependencies
 
 ~~~
 git clone https://github.com/duleorlovic/home_automation.git
+cd home_automation
+bundle install
+cd public
+npm install
+cd -
+~~~
+
+DB
+
+~~~
+sudo rake db:migrate
 ~~~
 
 To run at startup when device boots, create `.bash_profile`
@@ -11,6 +31,12 @@ To run at startup when device boots, create `.bash_profile`
 ~~~
 # ~/.bash_profile
 sudo ruby /home/pi/home_automation/app.rb -e production
+~~~
+
+To run scheduled task for temperature readings
+
+~~~
+rake temp:read
 ~~~
 
 Watch logs
