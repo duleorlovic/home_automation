@@ -23,6 +23,7 @@ cd -
 DB
 
 ~~~
+sudo rake db:create
 sudo rake db:migrate
 ~~~
 
@@ -36,7 +37,7 @@ sudo ruby /home/pi/home_automation/app.rb -e production
 To run scheduled task for temperature readings
 
 ~~~
-rake temp:read
+0 * * * * cd home_automation ; rake temp:read >> log/cron.log 2>&1
 ~~~
 
 Watch logs

@@ -48,8 +48,7 @@ end
 
 # to be able to access from other computers, or run with `ruby app.rb -o 0.0.0.0
 set :bind, '0.0.0.0'
-
-set :database, adapter: 'sqlite3', database: 'db/home_automation.sqlite3'
+set :database, adapter: 'sqlite3', database: "#{__dir__}/db/home_automation.sqlite3"
 
 enable :sessions
 
