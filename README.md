@@ -7,6 +7,7 @@ git clone https://github.com/duleorlovic/home_automation.git
 ~~~
 
 To run at startup when device boots, create `.bash_profile`
+
 ~~~
 # ~/.bash_profile
 sudo ruby /home/pi/home_automation/app.rb -e production
@@ -18,13 +19,13 @@ Watch logs
 tail -f /home/pi/home_automation/log/production.log
 ~~~
 
-Check if it running
+Check if it is running
 
 ~~~
 ps aux | grep home_automation
 ~~~
 
-## Development
+## Development on Pi
 
 Set up keys on raspberry pi and download source from your comp
 

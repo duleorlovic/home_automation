@@ -1,3 +1,4 @@
+# rubocop:disable Style/GlobalVars
 require 'sinatra'
 require 'sinatra/reloader' if development?
 require 'byebug'
@@ -48,12 +49,11 @@ set :bind, '0.0.0.0'
 
 enable :sessions
 
+# this is used as fake pin
 class MyPin
   def initialize(h)
     @h = h
-    if IS_RASPBERRY
-      @pin = PiPiper::Pin.new h
-    end
+    @pin = PiPiper::Pin.new h if IS_RASPBERRY
   end
 
   def on
@@ -83,18 +83,52 @@ class MyPin
   end
 end
 
+# this is used as fake 1-wire reading
+class OneWire
+  def initialize(file_name)
+    @file_name = file_name
+  end
+
+  def read
+    reading = if IS_RASPBERRY
+                File.read @file_name
+              else
+                sample_reading
+              end
+    convert_to_number reading
+  end
+
+  def convert_to_number(reading)
+    temp = reading.split('t=').last
+    if temp
+      temp.strip.to_f / 1_000
+    else
+      'not available'
+    end
+  end
+
+  def sample_reading
+    <<~FILE
+      08 02 4b 46 7f ff 08 10 a3 : crc=a3 YES
+      08 02 4b 46 7f ff 08 10 a3 t=32500
+    FILE
+  end
+end
+
 system 'gpio unexportall'
 garden = MyPin.new pin: GARDEN_MOTOR_RELAY_PIN, direction: :out
 blind_up = MyPin.new pin: BLIND_UP_RELAY_1_PIN, direction: :out
 blind_down = MyPin.new pin: BLIND_DOWN_RELAY_1_PIN, direction: :out
 _light = MyPin.new pin: LIGHT_INPUT_PIN, direction: :in
+t1 = OneWire.new '/sys/bus/w1/devices/28-000004e4793a/w1_slave'
 
 before do
   $session = session
+  @garden = garden
+  @t1 = t1
 end
 
 get '/' do
-  @garden = garden
   erb :index
 end
 
@@ -114,6 +148,6 @@ post '/' do
     blind_down.off
   end
   logger.info params
-  @garden = garden
   erb :index
 end
+# rubocop:enable Style/GlobalVars
