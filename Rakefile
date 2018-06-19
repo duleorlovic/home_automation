@@ -9,7 +9,7 @@ end
 namespace :temp do
   task :read do
     require './app'
-    t1 = OneWire.new TEMPERATURE_FILE
-    Temperature.create sensor: TEMPERATURE_FILE, celsius: t1.read
+    Temperature.create sensor: 'attic', celsius: TEMP_ATTIC.read
+    Temperature.create sensor: 'living_room', celsius: TEMP_LIVING_ROOM.read
   end
 end

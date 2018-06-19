@@ -62,7 +62,17 @@ git reset --hard HEAD^ && git pull local master
 sudo ruby app.rb
 ~~~
 
-Run in crontab
+# Cron jobs
+
+For temperature reading
+
+~~~
+# crontab
+# every hour at 50min
+50 * * * * cd home_automation ; sudo rake temp:read >> log/cron.log 2>&1
+~~~
+
+Run in crontab on host
 
 ~~~
 */3 * * * * curl http://192.168.1.6:4567 --data commit=water-on ; sleep 5 ; curl http://192.168.1.6:4567 --data commit=water-off >> /home/orlovic/Downloads/cron.log 2>&1

@@ -17,7 +17,8 @@ BLIND_UP_RELAY_1_PIN = 7 # BCM 7, wPi 11, Physical 26
 BLIND_DOWN_RELAY_1_PIN = 8 # BCM 8, wPi 10, Physical 24
 LIGHT_INPUT_PIN = 18 # BCM 18, wPi 1, Physical 12
 TEMERATURE_PIN = 4 # BCM 4, wPi 7, Physical 7
-TEMPERATURE_FILE = '/sys/bus/w1/devices/28-000004e4793a/w1_slave'.freeze
+ATTIC_TEMP_FILE = '/sys/bus/w1/devices/28-000004e4793a/w1_slave'.freeze
+LIVING_ROOM_TEMP_FILE = '/sys/bus/w1/devices/28-000004e41fff/w1_slave'.freeze
 UP_DOWN_DURATION_IN_SECONDS = 2
 
 # http://recipes.sinatrarb.com/p/middleware/rack_commonlogger
@@ -88,6 +89,7 @@ end
 
 # this is used as fake 1-wire reading
 class OneWire
+  attr_accessor :file_name
   def initialize(file_name)
     @file_name = file_name
   end
@@ -123,7 +125,8 @@ garden = MyPin.new pin: GARDEN_MOTOR_RELAY_PIN, direction: :out
 blind_up = MyPin.new pin: BLIND_UP_RELAY_1_PIN, direction: :out
 blind_down = MyPin.new pin: BLIND_DOWN_RELAY_1_PIN, direction: :out
 _light = MyPin.new pin: LIGHT_INPUT_PIN, direction: :in
-t1 = OneWire.new TEMPERATURE_FILE
+TEMP_ATTIC = OneWire.new ATTIC_TEMP_FILE
+TEMP_LIVING_ROOM = OneWire.new LIVING_ROOM_TEMP_FILE
 
 class Temperature < ActiveRecord::Base
 end
@@ -131,7 +134,6 @@ end
 before do
   $session = session
   @garden = garden
-  @t1 = t1
   @temperatures = Temperature.all
 end
 
