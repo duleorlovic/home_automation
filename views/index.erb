@@ -1,5 +1,6 @@
 <h1><a href='/'>Dashboard</a></h1>
-<h2 class='text-center'>Water is <%= @garden.read ? 'ON' : 'OFF' %>
+<h2 class='text-center'>Water is set to <%= @garden.read ? 'ON' : 'OFF' %> current: <%= @water_flow.reading.round 2 %> L/min</h2>
+
 <form action="/" method="POST">
   <div class="form-group form-row">
     <div class='col'>

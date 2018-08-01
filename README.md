@@ -5,7 +5,9 @@
 Sqlite3 on Rpi
 
 ~~~
-sudo apt-get update; sudo apt-get -y dist-upgrade; sudo apt-get install sqlite3
+sudo apt-get update; sudo apt-get -y dist-upgrade
+sudo apt-get install ruby ruby-dev
+sudo apt-get install git vim sqlite3 libsqlite3-dev
 sudo apt-get install npm
 ~~~
 
@@ -20,11 +22,17 @@ npm install
 cd -
 ~~~
 
-DB
+DB prepare. We need sudo since rake tasks need to load pi_piper and all pins
 
 ~~~
-sudo rake db:create
-sudo rake db:migrate
+sudo bundle exec rake db:create
+sudo bundle exec rake db:migrate
+~~~
+
+To run Sinatra server use
+
+~~~
+sudo bundle exec ruby app.rb
 ~~~
 
 To run at startup when device boots, create `.bash_profile`
@@ -54,11 +62,16 @@ ps aux | grep home_automation
 
 ## Development on Pi
 
-Set up keys on raspberry pi and download source from your comp
+Push with a force
 
 ~~~
-git clone orlovic@192.168.2.103:/home/orlovic/ruby/home_automation/.git
-git reset --hard HEAD^ && git pull local master
+git add . &&  git commit --amend --no-edit && git push -f
+~~~
+
+and download with hard reset
+
+~~~
+git reset --hard HEAD^ && git pull
 sudo ruby app.rb
 ~~~
 

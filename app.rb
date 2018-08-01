@@ -12,13 +12,27 @@ else
 end
 
 # check pin numbers with `gpio readall`
+# GARDEN_MOTOR_RELAY_PIN - 1K - pin2 Base BC547,
+# pin1 Collector BC547 - white_relay left,
+# pin3 Emitter BC547 - GND, white_relay right - 3.3V pin1 Rpi,
+# white_relay left - 1n4007 - white_relay right
+# white_relay should connect brown 220V
 GARDEN_MOTOR_RELAY_PIN = 17 # BCM 17, wPi 0, Physical 11
 BLIND_UP_RELAY_1_PIN = 7 # BCM 7, wPi 11, Physical 26
 BLIND_DOWN_RELAY_1_PIN = 8 # BCM 8, wPi 10, Physical 24
+# 220V light - DC_adapter 3V, plus DC_adapter - LIGHT_INPUT_PIN, minus
+# DC_adapter - GND
 LIGHT_INPUT_PIN = 18 # BCM 18, wPi 1, Physical 12
-TEMERATURE_PIN = 4 # BCM 4, wPi 7, Physical 7
+# TEMPERATURE_PIN - pin2 temp_connector, pin1 temp_connector - pin1 3.3v Rpi,
+# pin3 temp_connector - GND
+# you can connect as many temp sensors as you like, reading from files
+TEMPERATURE_PIN = 4 # BCM 4, wPi 7, Physical 7
 ATTIC_TEMP_FILE = '/sys/bus/w1/devices/28-000004e4793a/w1_slave'.freeze
 LIVING_ROOM_TEMP_FILE = '/sys/bus/w1/devices/28-000004e41fff/w1_slave'.freeze
+# water_flow middle output - WATER_FLOW_PIN  no need for voltage divider since
+# it is small current, water_flow left - 5V Rpi, water_flow right - GND
+WATER_FLOW_PIN = 27 # BCM 27, wPi 2, Physical 13
+
 UP_DOWN_DURATION_IN_SECONDS = 2
 
 # http://recipes.sinatrarb.com/p/middleware/rack_commonlogger
@@ -96,7 +110,7 @@ class OneWire
 
   def read
     reading = if IS_RASPBERRY
-                File.read @file_name
+                File.exists?(@file_name) && File.read(@file_name)
               else
                 sample_reading
               end
@@ -104,12 +118,10 @@ class OneWire
   end
 
   def convert_to_number(reading)
+    return 'temperature_not_available' unless reading.present?
     temp = reading.split('t=').last
-    if temp
-      temp.strip.to_f / 1_000
-    else
-      'not available'
-    end
+    return 'temperature_not_proper_format' unless temp
+    temp.strip.to_f / 1_000
   end
 
   def sample_reading
@@ -120,6 +132,35 @@ class OneWire
   end
 end
 
+# this is used to detect water flow
+class WaterFlow
+  MEASUREMENT_COUNT = 200
+  def initialize
+    @pin = MyPin.new pin: WATER_FLOW_PIN, direction: :in, pull: :up
+  end
+
+  def reading
+    last_reading = @pin.read
+    count = 0
+    t = Time.now.to_f
+    MEASUREMENT_COUNT.times do
+      reading = @pin.read
+      next if last_reading == reading
+      last_reading = reading
+      count += 1
+    end
+    # we should measure the time and use coeficient to get liters
+    calculate(count, Time.now.to_f - t)
+  end
+
+  # coeficient if 4.8 ie if frequency is 48Hz than flow is = 48/4.8 = 10L/min
+  def calculate(count, elapsed_time)
+    return -1 if elapsed_time.zero?
+    coeficient = 4.8
+    (count.to_f / elapsed_time) / coeficient
+  end
+end
+
 system 'gpio unexportall'
 garden = MyPin.new pin: GARDEN_MOTOR_RELAY_PIN, direction: :out
 blind_up = MyPin.new pin: BLIND_UP_RELAY_1_PIN, direction: :out
@@ -127,6 +168,7 @@ blind_down = MyPin.new pin: BLIND_DOWN_RELAY_1_PIN, direction: :out
 _light = MyPin.new pin: LIGHT_INPUT_PIN, direction: :in
 TEMP_ATTIC = OneWire.new ATTIC_TEMP_FILE
 TEMP_LIVING_ROOM = OneWire.new LIVING_ROOM_TEMP_FILE
+water_flow = WaterFlow.new
 
 class Temperature < ActiveRecord::Base
 end
@@ -134,7 +176,8 @@ end
 before do
   $session = session
   @garden = garden
-  @temperatures = Temperature.all
+  @water_flow = water_flow
+  @temperatures = Temperature.all.last 100
 end
 
 get '/' do
