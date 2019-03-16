@@ -81,6 +81,7 @@ class MyPin
     else
       $session["value#{@h[:pin]}"] = true
     end
+    Log.create text: 'water-on', color: 'info'
   end
 
   def off
@@ -90,6 +91,7 @@ class MyPin
     else
       $session["value#{@h[:pin]}"] = false
     end
+    Log.create text: 'water-off', color: 'warning'
   end
 
   def read
@@ -118,9 +120,11 @@ class OneWire
   end
 
   def convert_to_number(reading)
-    return 'temperature_not_available' unless reading.present?
+    return 'temperature_not_available' if reading.blank?
+
     temp = reading.split('t=').last
     return 'temperature_not_proper_format' unless temp
+
     temp.strip.to_f / 1_000
   end
 
@@ -146,6 +150,7 @@ class WaterFlow
     MEASUREMENT_COUNT.times do
       reading = @pin.read
       next if last_reading == reading
+
       last_reading = reading
       count += 1
     end
@@ -156,6 +161,7 @@ class WaterFlow
   # coeficient if 4.8 ie if frequency is 48Hz than flow is = 48/4.8 = 10L/min
   def calculate(count, elapsed_time)
     return -1 if elapsed_time.zero?
+
     coeficient = 4.8
     (count.to_f / elapsed_time) / coeficient
   end
@@ -170,7 +176,11 @@ TEMP_ATTIC = OneWire.new ATTIC_TEMP_FILE
 TEMP_LIVING_ROOM = OneWire.new LIVING_ROOM_TEMP_FILE
 water_flow = WaterFlow.new
 
+# temperatures are reading in rake file
 class Temperature < ActiveRecord::Base
+end
+
+class Log < ActiveRecord::Base
 end
 
 before do
@@ -184,10 +194,25 @@ get '/' do
   erb :index
 end
 
+get '/temperature' do
+  erb :temperature
+end
+
+get '/logs' do
+  erb :logs
+end
+
 post '/' do
   case params[:commit]
   when 'water-on'
     garden.on
+    Thread.new do
+      sleep 1
+      if @water_flow.reading < 1
+        garden.off
+        Log.create text: "SHUT DOWN water since reading is #{@water_flow.reading}", color: 'danger'
+      end
+    end
   when 'water-off'
     garden.off
   when 'UP'

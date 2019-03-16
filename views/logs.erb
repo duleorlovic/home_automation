@@ -1,0 +1,8 @@
+<ul>
+  <% Log.all.order(created_at: :desc).each do |log| %>
+    <li class='text-<%= log.color %>'>
+      <%= log.created_at %>
+      <b><%= log.text %></b>
+    </li>
+  <% end %>
+</ul>

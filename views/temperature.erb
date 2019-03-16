@@ -1,0 +1,56 @@
+<h2 class='text-center'>Attic: <%= TEMP_ATTIC.read %>&#8451; Living Room: <%= TEMP_LIVING_ROOM.read %>&#8451;</h2>
+
+<canvas id='temperatures' width='100%' data-temperatures='<%= @temperatures.to_json %>'></canvas>
+<script>
+document.addEventListener('DOMContentLoaded', function(){ 
+  var el = document.getElementById("temperatures")
+  var ctx = el.getContext('2d')
+  // [ { id: 1, sensor: 'attic', celsius: 32, created_at: '2018-06-19T09:55:49.785Z'},
+  //   { id: 2. sensor: 'living_room', celsius: 33, created_at: '2018-01-01T02:02:02' }
+  // ]
+  var temperatures = JSON.parse(el.dataset.temperatures)
+  var dataForSensors = {}
+  var colorForSensors = {}
+  var labels = []
+
+  function getRandomColor() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
+
+  temperatures.forEach((temperature) => {
+    labels.push(temperature.created_at)
+    if (dataForSensors[temperature.sensor]) {
+      dataForSensors[temperature.sensor].push(temperature.celsius)
+    } else {
+      dataForSensors[temperature.sensor] = [temperature.celsius]
+    }
+    if (!colorForSensors[temperature.sensor]) {
+      colorForSensors[temperature.sensor] = getRandomColor()
+    }
+  });
+
+  var datasets = []
+  for(let key in dataForSensors) {
+    let object = {
+      data: dataForSensors[key],
+      label: key,
+      borderColor: colorForSensors[key],
+      backgroundColor: colorForSensors[key] + 'b0',
+    }
+    datasets.push(object)
+  }
+
+  var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: datasets,
+    }
+  })
+}, false);
+</script>
