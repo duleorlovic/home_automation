@@ -1,5 +1,11 @@
 # Home Automation
 
+## Development
+
+```
+bundle exec ruby app.rb
+```
+
 ## Requirements to Run on Raspberry Pi
 
 Sqlite3 on Rpi

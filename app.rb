@@ -18,8 +18,8 @@ end
 # white_relay left - 1n4007 - white_relay right
 # white_relay should connect brown 220V
 GARDEN_MOTOR_RELAY_PIN = 17 # BCM 17, wPi 0, Physical 11
-BLIND_UP_RELAY_1_PIN = 7 # BCM 7, wPi 11, Physical 26
-BLIND_DOWN_RELAY_1_PIN = 8 # BCM 8, wPi 10, Physical 24
+BLIND_DOWN_RELAY_1_PIN = 7 # BCM 7, wPi 11, Physical 26
+BLIND_UP_RELAY_1_PIN = 8 # BCM 8, wPi 10, Physical 24
 # 220V light - DC_adapter 3V, plus DC_adapter - LIGHT_INPUT_PIN, minus
 # DC_adapter - GND
 LIGHT_INPUT_PIN = 18 # BCM 18, wPi 1, Physical 12
@@ -33,7 +33,7 @@ LIVING_ROOM_TEMP_FILE = '/sys/bus/w1/devices/28-000004e41fff/w1_slave'.freeze
 # it is small current, water_flow left - 5V Rpi, water_flow right - GND
 WATER_FLOW_PIN = 27 # BCM 27, wPi 2, Physical 13
 
-UP_DOWN_DURATION_IN_SECONDS = 2
+UP_DOWN_DURATION_IN_SECONDS = 18
 
 # http://recipes.sinatrarb.com/p/middleware/rack_commonlogger
 # configure do
@@ -206,11 +206,13 @@ post '/' do
   case params[:commit]
   when 'water-on'
     garden.on
-    Thread.new do
-      sleep 1
-      if @water_flow.reading < 1
-        garden.off
-        Log.create text: "SHUT DOWN water since reading is #{@water_flow.reading}", color: 'danger'
+    unless params[:disable_check] == '1'
+      Thread.new do
+        sleep 1
+        if @water_flow.reading < 1
+          garden.off
+          Log.create text: "SHUT DOWN water since reading is #{@water_flow.reading}", color: 'danger'
+        end
       end
     end
   when 'water-off'

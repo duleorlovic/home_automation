@@ -1,25 +1,28 @@
 <%
   garden_is_on = @garden.read
 %>
-<h2 class='text-center'>
-  Water is set to <%= garden_is_on ? 'ON' : 'OFF' %>
-  <% if garden_is_on %>
-    current: <%= @water_flow.reading.round 2 %> L/min
-    <% if params[:autorefresh] %>
-      <a href='/'>disable autorefresh</a>
-      <script>
-        setTimeout(function() {
-          <%# document.location.reload() %>
-          window.location.assign('/?autorefresh=true');
-        }, 1000);
-      </script>
-    <% else %>
-      <a href='/?autorefresh=true'>Autorefresh</a>
-    <% end %>
-  <% end %>
-</h2>
-
 <form action="/" method="POST">
+  <h2 class='text-center'>
+    Water is set to <%= garden_is_on ? 'ON' : 'OFF' %>
+    <% if garden_is_on %>
+      current: <%= @water_flow.reading.round 2 %> L/min
+      <% if params[:autorefresh] %>
+        <a href='/'>disable autorefresh</a>
+        <script>
+          setTimeout(function() {
+            <%# document.location.reload() %>
+            window.location.assign('/?autorefresh=true');
+          }, 1000);
+        </script>
+      <% else %>
+        <a href='/?autorefresh=true'>Autorefresh</a>
+      <% end %>
+    <% else %>
+      <label for='disable_check'>Disable check</label>
+      <input type='checkbox' name='disable_check' value='1' id='disable_check'>
+    <% end %>
+  </h2>
+
   <div class="form-group form-row">
     <div class='col'>
       <input type="submit" name="commit" value="water-on" class="form-control btn btn-success" <%= 'disabled' if garden_is_on %>>
