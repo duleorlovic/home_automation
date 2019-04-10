@@ -12,9 +12,23 @@
     <title>Home Automation</title>
   </head>
   <body>
-    <a href='/' class='h1'>Dashboard</a>
-    <a href='/temperature' class='h1'>Temperatures</a>
-    <a href='/logs' class='h1'>Logs</a>
+    <nav class='navbar navbar-expand-sm navbar-light bg-light'>
+      <a href='/' class='navbar-brand'>Dashboard</a>
+      <button class='navbar-toggler' type='button' data-toggle='collapse' data-target='#navbarSupportedContent' aria-controls='navbarSupportedContent' aria-expanded='false' aria-label='Toggle navigation'>
+        <span class='navbar-toggler-icon'></span>
+      </button>
+
+      <div class='collapse navbar-collapse' id='navbarSupportedContent'>
+        <ul class='navbar-nav mr-auto'>
+          <li class='nav-item'>
+            <a href='/temperature' class='nav-link'>Temperatures</a>
+          </li>
+          <li class='nav-item'>
+            <a href='/logs' class='nav-link'>Logs</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
     <%= yield %>
 
     <!-- Optional JavaScript -->

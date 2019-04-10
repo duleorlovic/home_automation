@@ -4,6 +4,8 @@
 <form action="/" method="POST">
   <h2 class='text-center'>
     Water is set to <%= garden_is_on ? 'ON' : 'OFF' %>
+  </h2>
+  <div class="form-group">
     <% if garden_is_on %>
       current: <%= @water_flow.reading.round 2 %> L/min
       <% if params[:autorefresh] %>
@@ -17,20 +19,25 @@
       <% else %>
         <a href='/?autorefresh=true'>Autorefresh</a>
       <% end %>
+      <input type="submit" name="commit" value="water-off" class="form-control btn btn-danger">
     <% else %>
-      <label for='disable_check'>Disable check</label>
-      <input type='checkbox' name='disable_check' value='1' id='disable_check'>
+      <div class='form-row'>
+        <div class='col'>
+          <label for='disable_check' class=''>Disable water check</label>
+          <input type='checkbox' name='disable_check' value='1' id='disable_check' class=''>
+        </div>
+        <div class='col'>
+          minutes:
+          <input type='number' name='minutes' value='5' min='1' max='99' class=''>
+        </div>
+      </div>
+      <input type="submit" name="commit" value="water-on" class="form-control btn btn-success">
     <% end %>
-  </h2>
-
-  <div class="form-group form-row">
-    <div class='col'>
-      <input type="submit" name="commit" value="water-on" class="form-control btn btn-success" <%= 'disabled' if garden_is_on %>>
-    </div>
-    <div class='col'>
-      <input type="submit" name="commit" value="water-off" class="form-control btn btn-danger" <%= 'disabled' unless garden_is_on %>>
-    </div>
   </div>
+</form>
+
+<form action="/" method="POST">
+  <h2 class='text-center'>Blinds</h2>
   <div class="form-group form-row">
     <div class="col">
       <input type="submit" name="commit" value='UP' class="form-control btn btn-primary">

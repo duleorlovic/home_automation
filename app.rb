@@ -215,6 +215,10 @@ post '/' do
         end
       end
     end
+    Thread.new do
+      sleep params[:minutes].to_i * 60
+      garden.off
+    end
   when 'water-off'
     garden.off
   when 'UP'
@@ -227,6 +231,7 @@ post '/' do
     blind_down.off
   end
   logger.info params
-  erb :index
+  # erb :index
+  redirect to '/?autorefresh=true'
 end
 # rubocop:enable Style/GlobalVars
