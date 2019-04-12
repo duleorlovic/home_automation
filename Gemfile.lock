@@ -20,6 +20,9 @@ GEM
     ffi (1.9.23)
     i18n (1.0.1)
       concurrent-ruby (~> 1.0)
+    mail (2.7.1)
+      mini_mime (>= 0.1.1)
+    mini_mime (1.0.1)
     minitest (5.11.3)
     multi_json (1.13.1)
     mustermann (1.0.2)
@@ -63,6 +66,7 @@ PLATFORMS
 DEPENDENCIES
   byebug
   eventmachine (= 1.2.5)
+  mail
   pi_piper
   racksh
   rake
@@ -73,4 +77,4 @@ DEPENDENCIES
   sqlite3
 
 BUNDLED WITH
-   1.16.1
+   1.16.2

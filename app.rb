@@ -4,6 +4,7 @@ require 'sinatra/activerecord'
 require 'sinatra/reloader' if development?
 require 'byebug'
 require 'logger'
+require_relative 'my_mail'
 IS_RASPBERRY = system('uname -a | grep raspberrypi')
 if IS_RASPBERRY
   require 'pi_piper'
@@ -69,36 +70,36 @@ enable :sessions
 
 # this is used as fake pin
 class MyPin
-  def initialize(h)
-    @h = h
-    @pin = PiPiper::Pin.new h if IS_RASPBERRY
+  def initialize(attr)
+    @attr = attr
+    @pin = PiPiper::Pin.new attr if IS_RASPBERRY
   end
 
   def on
-    # $logger.info "ON #{@h}"
+    # $logger.info "ON #{@attr}"
     if IS_RASPBERRY
       @pin.on
     else
-      $session["value#{@h[:pin]}"] = true
+      $session["value#{@attr[:pin]}"] = true
     end
     Log.create text: 'water-on', color: 'info'
   end
 
-  def off
-    # $logger.info "OFF #{@h}"
+  def off(message: nil, color: nil)
+    # $logger.info "OFF #{@attr}"
     if IS_RASPBERRY
       @pin.off
     else
-      $session["value#{@h[:pin]}"] = false
+      $session["value#{@attr[:pin]}"] = false
     end
-    Log.create text: 'water-off', color: 'warning'
+    Log.create text: "water-off #{message}", color: color || 'warning'
   end
 
   def read
     if IS_RASPBERRY
       @pin.read == 1
     else
-      $session["value#{@h[:pin]}"]
+      $session["value#{@attr[:pin]}"]
     end
   end
 end
@@ -112,7 +113,7 @@ class OneWire
 
   def read
     reading = if IS_RASPBERRY
-                File.exists?(@file_name) && File.read(@file_name)
+                File.exist?(@file_name) && File.read(@file_name)
               else
                 sample_reading
               end
@@ -176,12 +177,14 @@ TEMP_ATTIC = OneWire.new ATTIC_TEMP_FILE
 TEMP_LIVING_ROOM = OneWire.new LIVING_ROOM_TEMP_FILE
 water_flow = WaterFlow.new
 
+# rubocop:disable Rails/ApplicationRecord
 # temperatures are reading in rake file
 class Temperature < ActiveRecord::Base
 end
 
 class Log < ActiveRecord::Base
 end
+# rubocop:enable Rails/ApplicationRecord
 
 before do
   $session = session
@@ -202,22 +205,23 @@ get '/logs' do
   erb :logs
 end
 
+# rubocop:disable Metrics/BlockLength
 post '/' do
   case params[:commit]
   when 'water-on'
     garden.on
-    unless params[:disable_check] == '1'
-      Thread.new do
-        sleep 1
-        if @water_flow.reading < 1
-          garden.off
-          Log.create text: "SHUT DOWN water since reading is #{@water_flow.reading}", color: 'danger'
-        end
-      end
-    end
+    # rubocop:disable Rails/TimeZone
+    current_time = Time.now
+    # rubocop:enable Rails/TimeZone
     Thread.new do
-      sleep params[:minutes].to_i * 60
-      garden.off
+      if params[:disable_check] != '1' && sleep(1) && @water_flow.reading < 1
+        text = "SHUT DOWN water since reading is #{@water_flow.reading}"
+        garden.off message: text, color: 'danger'
+        MyMail.send subject: "[home_automation] water_flow.reading is zero #{current_time}", text: text
+      elsif params[:minutes].to_i.positive?
+        sleep params[:minutes].to_i.minutes
+        garden.off message: "#{params[:minutes].to_i}.minutes elapsed from #{current_time}"
+      end
     end
   when 'water-off'
     garden.off
@@ -234,4 +238,5 @@ post '/' do
   # erb :index
   redirect to '/?autorefresh=true'
 end
+# rubocop:enable Metrics/BlockLength
 # rubocop:enable Style/GlobalVars

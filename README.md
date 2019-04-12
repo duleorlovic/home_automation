@@ -45,7 +45,7 @@ To run at startup when device boots, create `.bash_profile`
 
 ~~~
 # ~/.bash_profile
-sudo ruby /home/pi/home_automation/app.rb -e production
+sudo -E ruby /home/pi/home_automation/app.rb -e production
 ~~~
 
 To run scheduled task for temperature readings
@@ -78,7 +78,7 @@ and download with hard reset
 
 ~~~
 git reset --hard HEAD^ && git pull
-sudo ruby app.rb
+sudo -E ruby app.rb
 ~~~
 
 # Cron jobs
