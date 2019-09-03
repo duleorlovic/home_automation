@@ -34,7 +34,7 @@ LIVING_ROOM_TEMP_FILE = '/sys/bus/w1/devices/28-000004e41fff/w1_slave'.freeze
 # it is small current, water_flow left - 5V Rpi, water_flow right - GND
 WATER_FLOW_PIN = 27 # BCM 27, wPi 2, Physical 13
 
-UP_DOWN_DURATION_IN_SECONDS = 18
+UP_DOWN_DURATION_IN_SECONDS = 12
 
 # http://recipes.sinatrarb.com/p/middleware/rack_commonlogger
 # configure do
